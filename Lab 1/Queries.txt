@@ -1,4 +1,4 @@
---Task1
+--Table Creation
 
 CREATE TABLE MyTable (
     id NUMBER GENERATED ALWAYS AS IDENTITY,
@@ -6,7 +6,8 @@ CREATE TABLE MyTable (
     CONSTRAINT mytable_pk PRIMARY KEY (id)
 );
 
---Task2
+
+--anonymous block
 
 DECLARE
     v_counter NUMBER := 1;
@@ -23,3 +24,59 @@ BEGIN
 
     COMMIT ;
 end;
+
+
+--CompareEvenOddCount
+
+CREATE OR REPLACE FUNCTION CompareEvenOddCount RETURN VARCHAR2 IS
+    v_even_count NUMBER;
+    v_odd_count NUMBER;
+BEGIN
+     -- Получаем количество четных значений
+    SELECT COUNT(*)
+    INTO v_even_count
+    FROM MyTable
+    WHERE MOD(val, 2) = 0;
+
+    -- Получаем количество нечетных значений
+    SELECT COUNT(*)
+    INTO v_odd_count
+    FROM MyTable
+    WHERE MOD(val, 2) <> 0;
+
+     -- Сравниваем и возвращаем результат
+    IF v_even_count > v_odd_count THEN
+        RETURN 'TRUE';
+    ELSIF v_odd_count > v_even_count THEN
+        RETURN 'FALSE';
+    ELSE
+        RETURN 'EQUAL';
+    END IF;
+END CompareEvenOddCount;
+
+--вызов функции и вывод результата в консоль
+DECLARE
+    result VARCHAR2(10);
+BEGIN
+    result := CompareEvenOddCount();
+    DBMS_OUTPUT.PUT_LINE('Result: ' || result);
+END;
+
+
+--Insert Generation
+CREATE OR REPLACE FUNCTION InsertGenerator (id NUMBER) RETURN VARCHAR2 IS
+    v_insert_command VARCHAR2(1000);
+BEGIN
+    v_insert_command := 'INSERT INTO MyTable (ID, VAL) VALUES (' || id || ', ' || DBMS_RANDOM.VALUE(1, 10000) || ');';
+
+    DBMS_OUTPUT.PUT_LINE(v_insert_command);
+    RETURN v_insert_command;
+END InsertGenerator;
+
+--
+DECLARE
+    v_command VARCHAR2(4000);
+BEGIN
+    v_command := InsertGenerator(123); -- Замените 123 на ваше значение ID
+END;
+
