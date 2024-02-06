@@ -80,3 +80,37 @@ BEGIN
     v_command := InsertGenerator(123); -- Замените 123 на ваше значение ID
 END;
 
+
+--DML OPERATIONS
+CREATE OR REPLACE PROCEDURE InsertRecord(p_val NUMBER) IS
+BEGIN
+    INSERT INTO MyTable (VAL) VALUES (p_val);
+    COMMIT;
+END InsertRecord;
+
+BEGIN
+    InsertRecord(100);
+end;
+
+CREATE OR REPLACE PROCEDURE UpdateRecord(p_id NUMBER, p_new_val NUMBER) IS
+BEGIN
+    UPDATE MyTable SET VAL = p_new_val WHERE ID = p_id;
+    COMMIT;
+END UpdateRecord;
+
+BEGIN
+    UpdateRecord(1, 200);
+END;
+
+
+CREATE OR REPLACE PROCEDURE DeleteRecord(p_id NUMBER) IS
+BEGIN
+    DELETE FROM MyTable WHERE ID = p_id;
+    COMMIT;
+END DeleteRecord;
+
+BEGIN
+    DeleteRecord(10001);
+END;
+
+
