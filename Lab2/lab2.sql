@@ -33,3 +33,22 @@ end;
 INSERT INTO students (id, name, group_id) VALUES (1, 'Lera', 1);
 SELECT * FROM students;
 
+CREATE OR REPLACE TRIGGER check_group_id_unique
+BEFORE INSERT OR UPDATE
+    ON groups
+    FOR EACH ROW
+DECLARE
+    v_count NUMBER;
+BEGIN
+    SELECT count(*) INTO v_count
+    FROM groups WHERE id = :NEW.id;
+
+    IF (v_count > 0) THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Ошибка в таблице groups: запись с таким ID уже существует!');
+    end if;
+
+end;
+
+INSERT INTO groups (id, name, c_val) VALUES (1, 'gRUPPA', 20);
+SELECT * FROM groups;
+
