@@ -82,3 +82,22 @@ end;
 
 INSERT INTO groups (name, c_val) VALUES ('gRUPPA2', 10);
 SELECT * FROM groups;
+
+--Unique group name
+CREATE OR REPLACE TRIGGER check_group_name_unique
+    BEFORE INSERT OR UPDATE
+    ON groups
+    FOR EACH ROW
+DECLARE
+    v_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_count
+    FROM groups
+        WHERE groups.name = :NEW.name;
+
+    IF (v_count > 0) THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Ошибка: группа с таким названием уже сущетвует!');
+    end if;
+end;
+
+INSERT INTO groups (name, c_val) VALUES ('gRUPPA', 20);
