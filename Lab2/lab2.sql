@@ -1,3 +1,4 @@
+--Task1 (Tables creating)
 CREATE TABLE students (
     id NUMBER,
     name VARCHAR2(50),
@@ -14,6 +15,7 @@ CREATE TABLE groups (
     CONSTRAINT groups_pk PRIMARY KEY (id)
 );
 
+--Task2 (Unique triggers)
 CREATE OR REPLACE TRIGGER check_student_id_unique
 BEFORE INSERT OR UPDATE
     ON students
@@ -52,3 +54,31 @@ end;
 INSERT INTO groups (id, name, c_val) VALUES (1, 'gRUPPA', 20);
 SELECT * FROM groups;
 
+--autoincrements
+CREATE OR REPLACE TRIGGER students_id_autoincrement
+BEFORE INSERT
+    ON students
+    FOR EACH ROW
+BEGIN
+    SELECT COALESCE(MAX(ID), 0) + 1
+        INTO :NEW.ID
+        FROM students;
+
+end;
+
+INSERT INTO students (name, group_id) VALUES ('Sasha', 1);
+SELECT * FROM students;
+
+CREATE OR REPLACE TRIGGER groups_id_autoincrement
+BEFORE INSERT
+    ON groups
+    FOR EACH ROW
+BEGIN
+    SELECT COALESCE(MAX(ID), 0) + 1
+        INTO :NEW.ID
+        FROM groups;
+
+end;
+
+INSERT INTO groups (name, c_val) VALUES ('gRUPPA2', 10);
+SELECT * FROM groups;
