@@ -4,6 +4,7 @@ CREATE TABLE students (
     name VARCHAR2(50),
     group_id NUMBER,
 
+    FOREIGN KEY (group_id) REFERENCES GROUPS(ID),
     CONSTRAINT students_pk PRIMARY KEY (id)
 );
 
