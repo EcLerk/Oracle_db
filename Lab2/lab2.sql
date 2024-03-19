@@ -102,3 +102,23 @@ BEGIN
 end;
 
 INSERT INTO groups (name, c_val) VALUES ('gRUPPA', 20);
+
+
+--Task 3 (cascade deletion)
+CREATE OR REPLACE TRIGGER cascade_deletion
+    AFTER DELETE ON GROUPS
+    FOR EACH ROW
+BEGIN
+    DELETE FROM STUDENTS
+        WHERE STUDENTS.GROUP_ID = :OLD.ID;
+end;
+
+
+INSERT INTO GROUPS (NAME, C_VAL) VALUES('group_check_cascade', 35);
+SELECT * FROM GROUPS;
+INSERT INTO STUDENTS (NAME, GROUP_ID) VALUES('st_check_cascade', (select id from groups where name = 'group_check_cascade'));
+SELECT * FROM STUDENTS;
+DELETE FROM GROUPS WHERE Name = 'group_check_cascade';
+
+SELECT * FROM GROUPS;
+SELECT * FROM STUDENTS;
