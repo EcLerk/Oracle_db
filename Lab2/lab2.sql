@@ -156,3 +156,47 @@ end;
 INSERT INTO  STUDENTS (NAME, GROUP_ID) VALUES ('Kate', 1);
 INSERT INTO  STUDENTS (NAME, GROUP_ID) VALUES ('Dima', 2);
 SELECT * FROM LOG_STUDENTS;
+
+
+--task5
+CREATE OR REPLACE PROCEDURE restore_students_data (restore_date TIMESTAMP, time_offset INTERVAL)
+AS
+BEGIN
+    DELETE FROM STUDENTS;
+
+    FOR student IN (SELECT STUDENT_ID, NAME, GROUP_ID
+        FROM (
+            SELECT STUDENT_ID, NAME, GROUP_ID,
+                ROW_NUMBER() OVER (PARTITION BY STUDENT_ID ORDER BY DATETIME DESC) AS row_number
+            FROM LOG_STUDENTS
+            WHERE DATETIME <= restore_date + time_offset
+        )
+        WHERE row_number = 1)
+    LOOP
+            INSERT INTO STUDENTS (ID, NAME, GROUP_ID) VALUES
+            (student.STUDENT_ID, student.NAME, student.GROUP_ID);
+    END LOOP;
+    COMMIT;
+END;
+
+--task6
+CREATE OR REPLACE TRIGGER update_groups_c_val
+AFTER INSERT OR UPDATE OR DELETE ON students
+FOR EACH ROW
+DECLARE
+    student_count NUMBER;
+    v_group_id NUMBER;
+BEGIN
+    IF :OLD.GROUP_ID IS NULL OR :OLD.GROUP_ID != :NEW.GROUP_ID THEN
+    IF INSERTING THEN
+        UPDATE GROUPS SET C_VAL = C_VAL + 1 WHERE id = :new.group_id;
+    END IF;
+    IF UPDATING THEN
+        UPDATE GROUPS SET C_VAL = C_VAL - 1 WHERE id = :old.group_id;
+        UPDATE GROUPS SET C_VAL = C_VAL + 1 WHERE id = :new.group_id;
+    END IF;
+    IF DELETING THEN
+        UPDATE GROUPS SET C_VAL = C_VAL - 1 WHERE id = :old.group_id;
+    END IF;
+    END IF;
+END;
