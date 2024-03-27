@@ -159,7 +159,7 @@ SELECT * FROM LOG_STUDENTS;
 
 
 --task5
-CREATE OR REPLACE PROCEDURE restore_students_data (restore_date TIMESTAMP, time_offset INTERVAL)
+CREATE OR REPLACE PROCEDURE restore_students_data (restore_date TIMESTAMP, time_offset INTERVAL DAY TO SECOND)
 AS
 BEGIN
     DELETE FROM STUDENTS;
@@ -180,23 +180,15 @@ BEGIN
 END;
 
 --task6
-CREATE OR REPLACE TRIGGER update_groups_c_val
-AFTER INSERT OR UPDATE OR DELETE ON students
-FOR EACH ROW
-DECLARE
-    student_count NUMBER;
-    v_group_id NUMBER;
+CREATE OR REPLACE TRIGGER update_group_count
+AFTER INSERT OR UPDATE OR DELETE ON STUDENTS
 BEGIN
-    IF :OLD.GROUP_ID IS NULL OR :OLD.GROUP_ID != :NEW.GROUP_ID THEN
-    IF INSERTING THEN
-        UPDATE GROUPS SET C_VAL = C_VAL + 1 WHERE id = :new.group_id;
-    END IF;
-    IF UPDATING THEN
-        UPDATE GROUPS SET C_VAL = C_VAL - 1 WHERE id = :old.group_id;
-        UPDATE GROUPS SET C_VAL = C_VAL + 1 WHERE id = :new.group_id;
-    END IF;
-    IF DELETING THEN
-        UPDATE GROUPS SET C_VAL = C_VAL - 1 WHERE id = :old.group_id;
-    END IF;
-    END IF;
+
+        FOR group_ IN (SELECT GROUP_ID, COUNT(*) AS student_count FROM STUDENTS GROUP BY GROUP_ID)
+        LOOP
+            UPDATE GROUPS
+            SET C_VAL = group_.student_count
+            WHERE ID = group_.GROUP_ID;
+        END LOOP;
+
 END;
